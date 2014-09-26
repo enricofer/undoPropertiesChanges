@@ -172,18 +172,25 @@ class undoPropertiesChanges:
         self.toolBar.setObjectName("Undo properties changes")
         self.toolBar.addAction(self.uaction)
         self.toolBar.addAction(self.raction)
-        self.iface.addPluginToMenu(u"&undo properties Changes", self.uaction)
-        self.iface.addPluginToMenu(u"&undo properties Changes", self.raction)
+        self.iface.addPluginToMenu(u"&undo properties changes", self.uaction)
+        self.iface.addPluginToMenu(u"&undo properties changes", self.raction)
+        # register currently loaded layers
+        self.layersAddedAction(iface.legendInterface().layers())
+                
+
 
     def unload(self):
         # Remove the plugin menu item and icon
-        self.iface.removePluginMenu(u"&undoLayerChanges", self.uaction)
-        self.iface.removePluginMenu(u"&undoLayerChanges", self.raction)
+        self.iface.removePluginMenu(u"&undo properties changes", self.uaction)
+        self.iface.removePluginMenu(u"&undo properties changes", self.raction)
         del self.toolBar
-        del self.undo
         #disconnect layer events
         self.mapLayerRegistry.legendLayersAdded.disconnect(self.layersAddedAction)
         self.mapLayerRegistry.layersWillBeRemoved.connect(self.layersRemovedAction)
+        for layer in iface.legendInterface().layers():
+            # disconnect signals for will removed layers
+            layer.rendererChanged.disconnect()
+        del self.undo
 
 
     # recover the given layer state
