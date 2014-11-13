@@ -190,7 +190,7 @@ class undoPropertiesChanges:
         for layer in iface.legendInterface().layers():
             # disconnect signals for will removed layers
             layer.rendererChanged.disconnect()
-        del self.undo
+        #del self.undo
 
 
     # recover the given layer state
@@ -229,17 +229,19 @@ class undoPropertiesChanges:
             self.undo[layer.id()].uPush(layer.id(),self.getDomDef(layer))
             # connection to rendererChanged signal for added layers sending layer id
             layer.rendererChanged.connect(partial(self.layerChangedAction,layer.id()))
+        self.tra.ce(self.undo)
     
     # method connected to mapLayerRegistry.layersWillBeRemoved signal
     def layersRemovedAction(self,layerRemovedList):
+        self.tra.ce(layerRemovedList)
         if layerRemovedList == []:
             self.tra.ce( "REMOVED LAYERS")
             self.tra.ce( layerRemovedList)
         else:
             self.tra.ce( "MOVED LAYER")
         for layerId in layerRemovedList:
-            self.tra.ce( "REMOVED:")
-            self.tra.ce( layerId)
+            #self.tra.ce( "REMOVED:")
+            #self.tra.ce( layerId)
             del self.undo[layerId]
             # disconnect signals for will removed layers
             layer = self.mapLayerRegistry.mapLayer(layerId)
@@ -259,23 +261,25 @@ class undoPropertiesChanges:
     
     #method to update toolbar icons on layer change
     def currentLayerChanges(self,layer):
+        self.tra.ce(self.undo.keys())
         try:
             self.tra.ce( "current layer:"+layer.name())
             self.lastCurrentLayer=layer
         except:
             return
-        if self.undo[layer.id()].isEmpty():
-            self.uaction.setIcon(self.undoDisabledIcon)
-            self.uaction.setDisabled(True)
-        else:
-            self.uaction.setIcon(self.undoEnabledIcon)
-            self.uaction.setEnabled(True)
-        if not self.undo[layer.id()].isPopped():
-            self.raction.setIcon(self.redoDisabledIcon)
-            self.raction.setDisabled(True)
-        else:
-            self.raction.setIcon(self.redoEnabledIcon)
-            self.raction.setEnabled(True)
+        if layer.id() in self.undo.keys():
+            if self.undo[layer.id()].isEmpty():
+                self.uaction.setIcon(self.undoDisabledIcon)
+                self.uaction.setDisabled(True)
+            else:
+                self.uaction.setIcon(self.undoEnabledIcon)
+                self.uaction.setEnabled(True)
+            if not self.undo[layer.id()].isPopped():
+                self.raction.setIcon(self.redoDisabledIcon)
+                self.raction.setDisabled(True)
+            else:
+                self.raction.setIcon(self.redoEnabledIcon)
+                self.raction.setEnabled(True)
         
 
     #method connected to layer.rendererChanged signal
